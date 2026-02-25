@@ -1,0 +1,28 @@
+# IDE
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+app/build/
+
+# Local configuration
+local.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NDK
+.externalNativeBuild/
+.cxx/
+
+# Captures
+captures/
+
+# Logs
+*.log
+
+# kotlin
+.kotlin/
