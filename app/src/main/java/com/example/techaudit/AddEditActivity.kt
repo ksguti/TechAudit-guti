@@ -19,12 +19,35 @@ class AddEditActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddEditBinding
 
+    // variable global para saber si se esta editando
+    private var itemEditar: AuditItem? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityAddEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // detectar modo edicion
+        if (intent.hasExtra("EXTRA_ITEM_EDITAR")){
+            // recuperamos el objeto
+            itemEditar = if (android.os.Build.VERSION.SDK_INT >=33){
+                intent.getParcelableExtra("EXTRA_ITEM_EDITAR", AuditItem::class.java)
+            }else{
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra("EXTRA_ITEM_EDITAR")
+            }
+        }
 
+        // llenamos los campos de texto
+        itemEditar?.let { item ->
+            binding.etNombre.setText(item.nombre)
+            binding.etUbicacion.setText(item.ubicacion)
+            binding.etNotas.setText(item.notas)
+
+            // seleccionar el Spinner correcto
+            val posicionSpinner = AuditStatus.values().indexOf(item.estado)
+            binding.spEstado.setSelection(posicionSpinner)
+        }
         enableEdgeToEdge()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -37,7 +60,7 @@ class AddEditActivity : AppCompatActivity() {
         setupSpinner()
 
         binding.btnGuardar.setOnClickListener {
-            guardarRegistro()
+            guardarOActualizar()
         }
 
     }
@@ -56,7 +79,7 @@ class AddEditActivity : AppCompatActivity() {
         binding.spEstado.adapter = adapter
     }
 
-    private fun guardarRegistro() {
+    private fun guardarOActualizar() {
         // A. Capturar textos
         val nombre = binding.etNombre.text.toString()
         val ubicacion = binding.etUbicacion.text.toString()
@@ -72,25 +95,32 @@ class AddEditActivity : AppCompatActivity() {
         // El Spinner nos da la posición (0, 1, 2...), la usamos para buscar en el Enum
         val estadoSeleccionado = binding.spEstado.selectedItem as AuditStatus
 
-        // D. Crear el objeto
-        val nuevoItem = AuditItem(
-            id = UUID.randomUUID().toString(),
-            nombre = nombre,
-            ubicacion = ubicacion,
-            fechaRegistro = Date().toString(), // Fecha de hoy
-            estado = estadoSeleccionado,
-            notas = notas
-        )
-
-        // E. Guardar en BD (Corutina)
         val database = (application as TechAuditApp).database
 
-        lifecycleScope.launch {
-            database.auditDao().insert(nuevoItem)
-
-            // F. Cerrar y volver
-            Toast.makeText(this@AddEditActivity, "Guardado!", Toast.LENGTH_SHORT).show()
-            finish() // Esto cierra la actividad y nos regresa al Main
+        lifecycleScope.launch{
+            if(itemEditar == null){
+                val nuevoItem = AuditItem(
+                    id = UUID.randomUUID().toString(),
+                    nombre = nombre,
+                    ubicacion = ubicacion,
+                    fechaRegistro = Date().toString(), // Fecha de hoy
+                    estado = estadoSeleccionado,
+                    notas = notas
+                )
+                database.auditDao().insert(nuevoItem)
+                Toast.makeText(this@AddEditActivity, "Equipo creado", Toast.LENGTH_SHORT).show()
+            }else{
+                //editar
+                val itemActualizado = itemEditar!!.copy(
+                    nombre = nombre,
+                    ubicacion = ubicacion,
+                    estado = estadoSeleccionado,
+                    notas = notas,
+                )
+                database.auditDao().update(itemActualizado)
+                Toast.makeText(this@AddEditActivity, "Equipo actualizado", Toast.LENGTH_SHORT).show()
+            }
+            finish() //regresa al main
         }
     }
 }

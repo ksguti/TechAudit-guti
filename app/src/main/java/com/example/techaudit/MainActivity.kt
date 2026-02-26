@@ -4,16 +4,20 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.techaudit.adapter.AuditAdapter
 import com.example.techaudit.data.AuditDatabase
 import com.example.techaudit.databinding.ActivityMainBinding
 import com.example.techaudit.model.AuditItem
 import com.example.techaudit.model.AuditStatus
+import com.example.techaudit.ui.AuditViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
@@ -24,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var adapter: AuditAdapter
 
-    private lateinit var database: AuditDatabase
+    private val viewModel: AuditViewModel by viewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,11 +37,16 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        database = (application as TechAuditApp).database
-
         setupRecyclerView()
+        configurarDeslizarParaBorrar()
 
-        cargarDatosdeBaseDeDatos()
+        viewModel.allItems.observe(this){listaActualizada ->
+            adapter.actualizarLista(listaActualizada)
+        }
+
+
+
+
 
         binding.fabAgregar.setOnClickListener {
 
@@ -62,9 +71,9 @@ class MainActivity : AppCompatActivity() {
         adapter = AuditAdapter(mutableListOf()) { itemSeleccionado ->
             //Este lambda se ejecuta cuando doy clic a la tarjeta
 
-            val intent = Intent(this, DetailActivity::class.java)
+            val intent = Intent(this, AddEditActivity::class.java)
 
-            intent.putExtra("EXTRA_ITEM", itemSeleccionado)
+            intent.putExtra("EXTRA_ITEM_EDITAR", itemSeleccionado)
 
             startActivity(intent)
 
@@ -74,41 +83,28 @@ class MainActivity : AppCompatActivity() {
         binding.rvAuditoria.layoutManager = LinearLayoutManager(this)
 
         }
+    private fun configurarDeslizarParaBorrar() {
+        val swipeHandler = object : ItemTouchHelper.SimpleCallback(
+            0, // No nos importa mover arriba/abajo
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT // Permitir deslizar a izq y der
+        ) {
+            override fun onMove(r: RecyclerView, v: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder): Boolean = false
 
-    private fun cargarDatosdeBaseDeDatos() {
+            // Este método se dispara cuando el usuario suelta el dedo tras deslizar
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val posicion = viewHolder.adapterPosition
+                val itemABorrar = adapter.listaAuditoria[posicion]
 
-        lifecycleScope.launch {
-            val datos = database.auditDao().getAllItems()
+                viewModel.delete(itemABorrar)
+                Toast.makeText(this@MainActivity, "Equipo Eliminado", Toast.LENGTH_SHORT).show()
 
-            if (datos.isEmpty()) {
-                Toast.makeText(this@MainActivity, "No hay datos", Toast.LENGTH_SHORT).show()
-            }else {
-                adapter.actualizarLista(datos)
             }
         }
 
+        // Conectamos este comportamiento a nuestra lista
+        val itemTouchHelper = ItemTouchHelper(swipeHandler)
+        itemTouchHelper.attachToRecyclerView(binding.rvAuditoria)
     }
 
-    private fun insertarRegistro(){
-
-        val nuevoItem = AuditItem(
-            id = UUID.randomUUID().toString(),
-            nombre = "Equipo Nuevo #${(0..100).random()}",
-            ubicacion = "Recepcion",
-            fechaRegistro = Date().toString(),
-            estado = AuditStatus.PENDIENTE,
-            notas = "Registro Aleatorio"
-        )
-
-        lifecycleScope.launch {
-
-            database.auditDao().insert(nuevoItem)
-
-            Toast.makeText(this@MainActivity, "Registro Agregado", Toast.LENGTH_SHORT).show()
-
-            cargarDatosdeBaseDeDatos()
-
-        }
-    }
 }
 
