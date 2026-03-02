@@ -7,6 +7,8 @@ import java.util.Date
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+import androidx.room.ForeignKey
+import androidx.room.Index
 enum class AuditStatus {
     PENDIENTE,
     OPERATIVO,
@@ -14,18 +16,32 @@ enum class AuditStatus {
     NO_ENCONTRADO
 }
 
-@Entity(tableName = "equipos")
+@Entity(
+    tableName = "equipos",
+    foreignKeys = [
+        ForeignKey(
+            entity = Laboratorio::class,
+            parentColumns = ["id"],
+            childColumns = ["laboratorioId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("laboratorioId")]
+)
 @Parcelize
-data class AuditItem (
+data class AuditItem(
 
     @PrimaryKey
     val id: String,
 
-    val nombre:String,
+    val nombre: String,
     val ubicacion: String,
     val fechaRegistro: String,
+
     var estado: AuditStatus = AuditStatus.PENDIENTE,
     var notas: String = "",
-    var fotoUri: String ?= null
+    var fotoUri: String? = null,
 
-):Parcelable
+    val laboratorioId: Int
+
+) : Parcelable

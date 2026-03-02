@@ -19,4 +19,9 @@ class AuditRepository(private val auditDao: AuditDao){
     suspend fun delete(item: AuditItem){
         auditDao.delete(item)
     }
+
+    fun getItemsByLaboratorio(labId: Int): Flow<List<AuditItem>> {
+        return auditDao.getItemsByLaboratorio(labId)
+    }
 }
+

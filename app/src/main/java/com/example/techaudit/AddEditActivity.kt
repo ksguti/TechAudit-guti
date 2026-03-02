@@ -97,30 +97,60 @@ class AddEditActivity : AppCompatActivity() {
 
         val database = (application as TechAuditApp).database
 
-        lifecycleScope.launch{
-            if(itemEditar == null){
+        lifecycleScope.launch {
+
+            if (itemEditar == null) {
+
+                // Obtener laboratorio existente
+                val laboratorio = database.laboratorioDao().getFirstLaboratorio()
+
+                if (laboratorio == null) {
+                    Toast.makeText(
+                        this@AddEditActivity,
+                        "Error: No existe laboratorio",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+
                 val nuevoItem = AuditItem(
                     id = UUID.randomUUID().toString(),
                     nombre = nombre,
                     ubicacion = ubicacion,
-                    fechaRegistro = Date().toString(), // Fecha de hoy
+                    fechaRegistro = Date().toString(),
                     estado = estadoSeleccionado,
-                    notas = notas
+                    notas = notas,
+                    laboratorioId = laboratorio.id
                 )
+
                 database.auditDao().insert(nuevoItem)
-                Toast.makeText(this@AddEditActivity, "Equipo creado", Toast.LENGTH_SHORT).show()
-            }else{
-                //editar
+
+                Toast.makeText(
+                    this@AddEditActivity,
+                    "Equipo creado",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+            } else {
+
                 val itemActualizado = itemEditar!!.copy(
                     nombre = nombre,
                     ubicacion = ubicacion,
                     estado = estadoSeleccionado,
-                    notas = notas,
+                    notas = notas
+                    // laboratorioId NO se toca porque ya existe
                 )
+
                 database.auditDao().update(itemActualizado)
-                Toast.makeText(this@AddEditActivity, "Equipo actualizado", Toast.LENGTH_SHORT).show()
+
+                Toast.makeText(
+                    this@AddEditActivity,
+                    "Equipo actualizado",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-            finish() //regresa al main
+
+            finish()
         }
     }
 }

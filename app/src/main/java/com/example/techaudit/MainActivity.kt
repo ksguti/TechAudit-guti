@@ -17,7 +17,7 @@ import com.example.techaudit.data.AuditDatabase
 import com.example.techaudit.databinding.ActivityMainBinding
 import com.example.techaudit.model.AuditItem
 import com.example.techaudit.model.AuditStatus
-import com.example.techaudit.ui.AuditViewModel
+import com.example.techaudit.ui.MainViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var adapter: AuditAdapter
 
-    private val viewModel: AuditViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

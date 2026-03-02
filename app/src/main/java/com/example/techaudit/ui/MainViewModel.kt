@@ -4,29 +4,24 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
 import com.example.techaudit.TechAuditApp
 import com.example.techaudit.data.AuditRepository
 import com.example.techaudit.model.AuditItem
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class AuditViewModel(
-    application: Application,
-    private val laboratorioId: Int
-) : AndroidViewModel(application) {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: AuditRepository
 
-    val itemsByLaboratorio: LiveData<List<AuditItem>>
+    val allItems: LiveData<List<AuditItem>>
 
     init {
         val dao = (application as TechAuditApp).database.auditDao()
         repository = AuditRepository(dao)
 
-        itemsByLaboratorio =
-            repository.getItemsByLaboratorio(laboratorioId).asLiveData()
+        allItems = repository.allItems.asLiveData()
     }
-
     fun delete(item: AuditItem) = viewModelScope.launch {
         repository.delete(item)
     }

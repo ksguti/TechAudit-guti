@@ -18,6 +18,12 @@ interface AuditDao {
     @Query("SELECT * FROM equipos ORDER BY fechaRegistro DESC")
     fun getAllItems() : Flow<List<AuditItem>>
 
+    @Query("""
+    SELECT * FROM equipos 
+    WHERE laboratorioId = :labId 
+    ORDER BY fechaRegistro DESC""")
+    fun getItemsByLaboratorio(labId: Int): Flow<List<AuditItem>>
+
     //Buscar uno solo por ID
     @Query("SELECT * FROM equipos WHERE id = :id")
     suspend fun getById(id: String) : AuditItem
