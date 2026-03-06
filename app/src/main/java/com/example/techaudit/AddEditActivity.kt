@@ -21,12 +21,14 @@ class AddEditActivity : AppCompatActivity() {
 
     // variable global para saber si se esta editando
     private var itemEditar: AuditItem? = null
+    private var laboratorioId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityAddEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        laboratorioId = intent.getIntExtra("LAB_ID", -1)
         // detectar modo edicion
         if (intent.hasExtra("EXTRA_ITEM_EDITAR")){
             // recuperamos el objeto
@@ -101,17 +103,7 @@ class AddEditActivity : AppCompatActivity() {
 
             if (itemEditar == null) {
 
-                // Obtener laboratorio existente
-                val laboratorio = database.laboratorioDao().getFirstLaboratorio()
 
-                if (laboratorio == null) {
-                    Toast.makeText(
-                        this@AddEditActivity,
-                        "Error: No existe laboratorio",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@launch
-                }
 
                 val nuevoItem = AuditItem(
                     id = UUID.randomUUID().toString(),
@@ -120,7 +112,7 @@ class AddEditActivity : AppCompatActivity() {
                     fechaRegistro = Date().toString(),
                     estado = estadoSeleccionado,
                     notas = notas,
-                    laboratorioId = laboratorio.id
+                    laboratorioId = laboratorioId
                 )
 
                 database.auditDao().insert(nuevoItem)

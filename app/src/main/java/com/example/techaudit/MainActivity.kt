@@ -8,31 +8,25 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.techaudit.adapter.AuditAdapter
-import com.example.techaudit.data.AuditDatabase
 import com.example.techaudit.databinding.ActivityMainBinding
-import com.example.techaudit.model.AuditItem
-import com.example.techaudit.model.AuditStatus
 import com.example.techaudit.ui.MainViewModel
-import kotlinx.coroutines.launch
-import java.util.Date
-import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
     private lateinit var adapter: AuditAdapter
-
     private val viewModel: MainViewModel by viewModels()
 
+    private var laboratorioId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        laboratorioId = intent.getLongExtra("LAB_ID", -1).toInt()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -40,21 +34,26 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         configurarDeslizarParaBorrar()
 
-        viewModel.allItems.observe(this){listaActualizada ->
-            adapter.actualizarLista(listaActualizada)
+        // Verificar que exista laboratorio
+        if (laboratorioId != -1) {
+
+            Toast.makeText(this, "Laboratorio seleccionado: $laboratorioId", Toast.LENGTH_SHORT).show()
+
+            viewModel.getItemsByLaboratorio(laboratorioId)
+                .observe(this) { listaActualizada ->
+                    adapter.actualizarLista(listaActualizada)
+                }
         }
-
-
-
-
 
         binding.fabAgregar.setOnClickListener {
 
             val intent = Intent(this, AddEditActivity::class.java)
+
+            // enviamos el laboratorio al formulario
+            intent.putExtra("LAB_ID", laboratorioId)
+
             startActivity(intent)
-
         }
-
 
         enableEdgeToEdge()
 
@@ -66,45 +65,44 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        //Inicializar el adapter pasando lista y la accion del clic
 
         adapter = AuditAdapter(mutableListOf()) { itemSeleccionado ->
-            //Este lambda se ejecuta cuando doy clic a la tarjeta
 
             val intent = Intent(this, AddEditActivity::class.java)
-
             intent.putExtra("EXTRA_ITEM_EDITAR", itemSeleccionado)
 
             startActivity(intent)
-
         }
 
         binding.rvAuditoria.adapter = adapter
         binding.rvAuditoria.layoutManager = LinearLayoutManager(this)
+    }
 
-        }
     private fun configurarDeslizarParaBorrar() {
-        val swipeHandler = object : ItemTouchHelper.SimpleCallback(
-            0, // No nos importa mover arriba/abajo
-            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT // Permitir deslizar a izq y der
-        ) {
-            override fun onMove(r: RecyclerView, v: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder): Boolean = false
 
-            // Este método se dispara cuando el usuario suelta el dedo tras deslizar
+        val swipeHandler = object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+
+            override fun onMove(
+                r: RecyclerView,
+                v: RecyclerView.ViewHolder,
+                t: RecyclerView.ViewHolder
+            ): Boolean = false
+
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val posicion = viewHolder.adapterPosition
+
+                val posicion = viewHolder.bindingAdapterPosition
                 val itemABorrar = adapter.listaAuditoria[posicion]
 
                 viewModel.delete(itemABorrar)
-                Toast.makeText(this@MainActivity, "Equipo Eliminado", Toast.LENGTH_SHORT).show()
 
+                Toast.makeText(this@MainActivity, "Equipo Eliminado", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Conectamos este comportamiento a nuestra lista
         val itemTouchHelper = ItemTouchHelper(swipeHandler)
         itemTouchHelper.attachToRecyclerView(binding.rvAuditoria)
     }
-
 }
-

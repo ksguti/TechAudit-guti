@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 import com.example.techaudit.model.AuditItem
-import com.example.techaudit.model.Laboratorio   // 🔥 IMPORTANTE
+import com.example.techaudit.model.Laboratorio
 
 @Database(
     entities = [AuditItem::class, Laboratorio::class],
@@ -31,7 +31,7 @@ abstract class AuditDatabase : RoomDatabase() {
                     AuditDatabase::class.java,
                     "techaudit_db"
                 )
-                    .fallbackToDestructiveMigration()   // 🔥 MUY IMPORTANTE
+                    .fallbackToDestructiveMigration()
                     .build()
 
                 INSTANCE = instance

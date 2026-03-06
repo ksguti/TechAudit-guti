@@ -6,38 +6,41 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-
 import com.example.techaudit.model.AuditItem
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AuditDao {
 
-    //Traer todos los equipos ordenados por fecha
+    // =========================
+    // EQUIPOS
+    // =========================
 
+    // Obtener todos los equipos
     @Query("SELECT * FROM equipos ORDER BY fechaRegistro DESC")
-    fun getAllItems() : Flow<List<AuditItem>>
+    fun getAllItems(): Flow<List<AuditItem>>
 
+    // Obtener equipos de un laboratorio específico
     @Query("""
-    SELECT * FROM equipos 
-    WHERE laboratorioId = :labId 
-    ORDER BY fechaRegistro DESC""")
+        SELECT * FROM equipos 
+        WHERE laboratorioId = :labId 
+        ORDER BY fechaRegistro DESC
+    """)
     fun getItemsByLaboratorio(labId: Int): Flow<List<AuditItem>>
 
-    //Buscar uno solo por ID
+    // Buscar equipo por ID
     @Query("SELECT * FROM equipos WHERE id = :id")
-    suspend fun getById(id: String) : AuditItem
+    suspend fun getById(id: String): AuditItem?
 
-    //Insertar un nuevo equipo
+    // Insertar equipo
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: AuditItem)
 
-    //Actualizar un equipo
+    // Actualizar equipo
     @Update
     suspend fun update(item: AuditItem)
 
-    //Borrar un equipo
+    // Eliminar equipo
     @Delete
     suspend fun delete(item: AuditItem)
-
 }

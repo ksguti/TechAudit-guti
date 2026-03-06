@@ -14,14 +14,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: AuditRepository
 
-    val allItems: LiveData<List<AuditItem>>
-
     init {
-        val dao = (application as TechAuditApp).database.auditDao()
-        repository = AuditRepository(dao)
 
-        allItems = repository.allItems.asLiveData()
+        val db = (application as TechAuditApp).database
+
+        val auditDao = db.auditDao()
+        val laboratorioDao = db.laboratorioDao()
+
+        repository = AuditRepository(auditDao, laboratorioDao)
     }
+
+    // Obtener equipos de un laboratorio
+    fun getItemsByLaboratorio(labId: Int): LiveData<List<AuditItem>> {
+        return repository.getItemsByLaboratorio(labId).asLiveData()
+    }
+
     fun delete(item: AuditItem) = viewModelScope.launch {
         repository.delete(item)
     }
