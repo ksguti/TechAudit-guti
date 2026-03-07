@@ -68,8 +68,8 @@ dependencies {
     // ROOM DATABASE
     val roomVersion = "2.7.0-alpha12"
     implementation("androidx.room:room-runtime:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion") // Para Corutinas
-    ksp("androidx.room:room-compiler:$roomVersion")      // El procesador
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
     // ViewModel y LiveData
     val lifecycle_version = "2.7.0"

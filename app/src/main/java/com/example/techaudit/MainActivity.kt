@@ -26,7 +26,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        laboratorioId = intent.getLongExtra("LAB_ID", -1).toInt()
+        laboratorioId = intent.getIntExtra("LAB_ID", -1)
+        Toast.makeText(this, "LAB ID recibido: $laboratorioId", Toast.LENGTH_LONG).show()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -69,7 +70,9 @@ class MainActivity : AppCompatActivity() {
         adapter = AuditAdapter(mutableListOf()) { itemSeleccionado ->
 
             val intent = Intent(this, AddEditActivity::class.java)
+
             intent.putExtra("EXTRA_ITEM_EDITAR", itemSeleccionado)
+            intent.putExtra("LAB_ID", laboratorioId)
 
             startActivity(intent)
         }

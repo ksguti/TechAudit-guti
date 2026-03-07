@@ -20,6 +20,9 @@ class LaboratorioAdapter(
             binding.tvNombreLaboratorio.text = lab.nombre
             binding.tvEdificio.text = lab.edificio
 
+            // Mostrar ID del laboratorio en el label
+            binding.tvEdificioLabel.text = "#${lab.id}"
+
             binding.root.setOnClickListener {
                 onClick(lab)
             }
@@ -39,7 +42,9 @@ class LaboratorioAdapter(
 
     override fun onBindViewHolder(holder: LaboratorioViewHolder, position: Int) {
         holder.bind(listaLaboratorios[position])
+
     }
+
 
     override fun getItemCount(): Int = listaLaboratorios.size
 
@@ -47,5 +52,8 @@ class LaboratorioAdapter(
         listaLaboratorios.clear()
         listaLaboratorios.addAll(nuevaLista)
         notifyDataSetChanged()
+    }
+    fun obtenerLaboratorio(position: Int): Laboratorio {
+        return listaLaboratorios[position]
     }
 }
