@@ -101,8 +101,8 @@ class LaboratorioActivity : AppCompatActivity() {
             if (primerLab == null) {
 
                 val laboratorio = Laboratorio(
-                    nombre = "Lab 1",
-                    edificio = "Edificio A"
+                    nombre = "Laboratorio de Ciencia de Datos",
+                    edificio = "Edificio 2"
                 )
 
                 repo.insert(laboratorio)

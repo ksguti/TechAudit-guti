@@ -12,7 +12,7 @@
         android:id="@+id/tvHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TechAudit 📋"
+        android:text="Lista de Equipos 📋"
         android:textSize="24sp"
         android:textStyle="bold"
         android:padding="20dp"

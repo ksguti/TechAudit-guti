@@ -24,8 +24,8 @@ class TechAuditApp : Application() {
             if (laboratorioExistente == null) {
                 laboratorioDao.insert(
                     Laboratorio(
-                        nombre = "Laboratorio General",
-                        edificio = "Edificio Principal"
+                        nombre = "Laboratorio de Desarrollo de Software",
+                        edificio = "Edificio 1"
                     )
                 )
             }
