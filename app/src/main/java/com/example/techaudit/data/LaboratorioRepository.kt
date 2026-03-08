@@ -21,8 +21,4 @@ class LaboratorioRepository(
     suspend fun delete(lab: Laboratorio) {
         laboratorioDao.delete(lab)
     }
-
-    suspend fun getFirstLaboratorio(): Laboratorio? {
-        return laboratorioDao.getFirstLaboratorio()
-    }
 }
