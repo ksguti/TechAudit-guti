@@ -32,6 +32,9 @@ interface AuditDao {
     @Query("SELECT * FROM equipos WHERE id = :id")
     suspend fun getById(id: String): AuditItem?
 
+    @Query("SELECT * FROM equipos")
+    suspend fun getAllItemsDirect(): List<AuditItem>
+
     // Insertar equipo
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: AuditItem)

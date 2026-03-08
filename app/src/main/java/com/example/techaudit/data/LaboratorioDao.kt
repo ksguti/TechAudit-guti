@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface LaboratorioDao {
 
+    @Query("SELECT * FROM laboratorios")
+    suspend fun getAllLaboratoriosDirect(): List<Laboratorio>
+
     @Query("SELECT * FROM laboratorios ORDER BY nombre ASC")
     fun getAll(): Flow<List<Laboratorio>>
 

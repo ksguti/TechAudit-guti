@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,12 @@ import com.example.techaudit.adapter.AuditAdapter
 import com.example.techaudit.databinding.ActivityMainBinding
 import com.example.techaudit.ui.MainViewModel
 
+import com.example.techaudit.network.RetrofitClient
+import com.example.techaudit.network.LaboratorioApiModel
+import com.example.techaudit.network.EquipoApiModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -31,6 +38,12 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.btnSincronizar.setOnClickListener {
+
+            sincronizarDatos()
+
+        }
 
         setupRecyclerView()
         configurarDeslizarParaBorrar()
@@ -107,5 +120,67 @@ class MainActivity : AppCompatActivity() {
 
         val itemTouchHelper = ItemTouchHelper(swipeHandler)
         itemTouchHelper.attachToRecyclerView(binding.rvAuditoria)
+    }
+
+    private fun sincronizarDatos() {
+
+        val database = (application as TechAuditApp).database
+
+        lifecycleScope.launch {
+
+            try {
+
+                // obtener laboratorios
+                val laboratorios = database.laboratorioDao().getAllLaboratoriosDirect()
+
+                for (lab in laboratorios) {
+
+                    val apiLab = LaboratorioApiModel(
+                        nombre = lab.nombre,
+                        edificio = lab.edificio.toString()
+                    )
+
+                    RetrofitClient.apiService.enviarLaboratorio(apiLab)
+                }
+
+                // obtener equipos
+                val equipos = database.auditDao().getAllItemsDirect()
+
+                for (eq in equipos) {
+
+                    val apiEquipo = EquipoApiModel(
+                        nombre = eq.nombre,
+                        ubicacion = eq.ubicacion,
+                        fechaRegistro = eq.fechaRegistro,
+                        estado = eq.estado.name,
+                        notas = eq.notas,
+                        fotoUri = eq.fotoUri,
+                        laboratorioId = eq.laboratorioId.toString()
+                    )
+
+                    RetrofitClient.apiService.enviarEquipo(apiEquipo)
+                }
+
+                withContext(Dispatchers.Main) {
+
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Sincronización completada",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                }
+
+            } catch (e: Exception) {
+
+                Toast.makeText(
+                    this@MainActivity,
+                    "Error al sincronizar",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            }
+
+        }
     }
 }
