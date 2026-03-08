@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.techaudit.adapter.AuditAdapter
 import com.example.techaudit.databinding.ActivityMainBinding
 import com.example.techaudit.ui.MainViewModel
-
+import android.view.View
 import com.example.techaudit.network.RetrofitClient
 import com.example.techaudit.network.LaboratorioApiModel
 import com.example.techaudit.network.EquipoApiModel
@@ -126,6 +126,8 @@ class MainActivity : AppCompatActivity() {
 
         val database = (application as TechAuditApp).database
 
+        binding.progressSync.visibility = View.VISIBLE
+
         lifecycleScope.launch {
 
             try {
@@ -162,6 +164,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 withContext(Dispatchers.Main) {
+                    binding.progressSync.visibility = View.GONE
 
                     Toast.makeText(
                         this@MainActivity,
@@ -172,6 +175,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                binding.progressSync.visibility = View.GONE
 
                 Toast.makeText(
                     this@MainActivity,
@@ -183,4 +187,6 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+
+
 }
